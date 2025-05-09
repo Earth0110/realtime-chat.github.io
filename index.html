@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Group Chat</title>
+  <title>กลุ่มแชท</title>
   <style>
     body {
       margin: 0;
@@ -76,14 +76,15 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 
   <script>
-    // 🟡 วาง firebaseConfig ที่นี่
     const firebaseConfig = {
       apiKey: "AIzaSyC9Ixs0DauT_UPlAS0Cv_oGYODqiQnwFUs",
-  authDomain: "test-chat-by-earth.firebaseapp.com",
-  projectId: "test-chat-by-earth",
-  storageBucket: "test-chat-by-earth.firebasestorage.app",
-  messagingSenderId: "1009444037169",
-  appId: "1:1009444037169:web:cf667807f753a7677d6b10",
+      authDomain: "test-chat-by-earth.firebaseapp.com",
+      databaseURL: "https://test-chat-by-earth-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "test-chat-by-earth",
+      storageBucket: "test-chat-by-earth.appspot.com",
+      messagingSenderId: "1009444037169",
+      appId: "1:1009444037169:web:cf667807f753a7677d6b10",
+      measurementId: "G-1JPX0LHRC3"
     };
 
     firebase.initializeApp(firebaseConfig);

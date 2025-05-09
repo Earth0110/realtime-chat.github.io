@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Group Chat</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    .chat-container {
+      background: white;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+    #messages {
+      height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #fafafa;
+    }
+    .message {
+      margin: 5px 0;
+      padding: 8px;
+      background: #e1f5fe;
+      border-radius: 8px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      outline: none;
+    }
+    input {
+      width: 65%;
+      margin-bottom: 10px;
+    }
+    #nameInput {
+      width: 100%;
+      margin-bottom: 15px;
+    }
+    button {
+      background: #2196f3;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #1976d2;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <h2>💬 กลุ่มแชท</h2>
+    <input id="nameInput" type="text" placeholder="ใส่ชื่อของคุณ..." />
+    <div id="messages"></div>
+    <input id="messageInput" type="text" placeholder="พิมพ์ข้อความ..." />
+    <button onclick="sendMessage()">ส่ง</button>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+
+  <script>
+    // 🟡 วาง firebaseConfig ที่นี่
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const messagesRef = db.ref("messages");
+
+    messagesRef.on("child_added", function(snapshot) {
+      const msg = snapshot.val();
+      const msgDiv = document.createElement("div");
+      msgDiv.className = "message";
+      msgDiv.textContent = msg.name + ": " + msg.text;
+      document.getElementById("messages").appendChild(msgDiv);
+      document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+    });
+
+    function sendMessage() {
+      const name = document.getElementById("nameInput").value.trim();
+      const text = document.getElementById("messageInput").value.trim();
+      if (name && text) {
+        messagesRef.push({ name, text });
+        document.getElementById("messageInput").value = "";
+      }
+    }
+  </script>
+</body>
+</html>

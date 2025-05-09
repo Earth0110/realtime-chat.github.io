@@ -18,12 +18,12 @@
       background: white;
       border-radius: 12px;
       width: 100%;
-      max-width: 500px;
+      max-width: 600px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       padding: 20px;
     }
     #messages {
-      height: 300px;
+      height: 400px;
       overflow-y: auto;
       border: 1px solid #ddd;
       border-radius: 8px;
@@ -36,6 +36,18 @@
       padding: 8px;
       background: #e1f5fe;
       border-radius: 8px;
+      position: relative;
+    }
+    .timestamp {
+      font-size: 10px;
+      color: #777;
+      position: absolute;
+      bottom: 2px;
+      right: 10px;
+    }
+    .name {
+      font-weight: bold;
+      margin-right: 5px;
     }
     input, button {
       padding: 10px;
@@ -45,7 +57,7 @@
       outline: none;
     }
     input {
-      width: 65%;
+      width: calc(100% - 120px);
       margin-bottom: 10px;
     }
     #nameInput {
@@ -56,9 +68,28 @@
       background: #2196f3;
       color: white;
       cursor: pointer;
+      margin-left: 5px;
     }
     button:hover {
       background: #1976d2;
+    }
+    #controls {
+      display: flex;
+      align-items: center;
+    }
+    #imageInput {
+      margin-top: 10px;
+    }
+    .emoji {
+      font-size: 20px;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+    .edit-btn, .delete-btn {
+      font-size: 10px;
+      margin-left: 10px;
+      cursor: pointer;
+      color: #888;
     }
   </style>
 </head>
@@ -67,11 +98,13 @@
     <h2>💬 กลุ่มแชท</h2>
     <input id="nameInput" type="text" placeholder="ใส่ชื่อของคุณ..." />
     <div id="messages"></div>
-    <input id="messageInput" type="text" placeholder="พิมพ์ข้อความ..." />
-    <button onclick="sendMessage()">ส่ง</button>
+    <div id="controls">
+      <input id="messageInput" type="text" placeholder="พิมพ์ข้อความหรือใส่อีโมจิ..." />
+      <button onclick="sendMessage()">ส่ง</button>
+    </div>
+    <input type="file" id="imageInput" accept="image/*" />
   </div>
 
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 
@@ -91,21 +124,90 @@
     const db = firebase.database();
     const messagesRef = db.ref("messages");
 
+    const nameInput = document.getElementById("nameInput");
+    const messageInput = document.getElementById("messageInput");
+    const messagesDiv = document.getElementById("messages");
+    const imageInput = document.getElementById("imageInput");
+
+    const nameColors = {};
+    function getColor(name) {
+      if (!nameColors[name]) {
+        const hue = Math.floor(Math.random() * 360);
+        nameColors[name] = `hsl(${hue}, 70%, 50%)`;
+      }
+      return nameColors[name];
+    }
+
     messagesRef.on("child_added", function(snapshot) {
       const msg = snapshot.val();
       const msgDiv = document.createElement("div");
       msgDiv.className = "message";
-      msgDiv.textContent = msg.name + ": " + msg.text;
-      document.getElementById("messages").appendChild(msgDiv);
-      document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "name";
+      nameSpan.style.color = getColor(msg.name);
+      nameSpan.textContent = msg.name + ": ";
+
+      const contentSpan = document.createElement("span");
+      if (msg.image) {
+        const img = document.createElement("img");
+        img.src = msg.image;
+        img.style.maxWidth = "100%";
+        contentSpan.appendChild(img);
+      } else {
+        contentSpan.textContent = msg.text;
+      }
+
+      const timeSpan = document.createElement("span");
+      timeSpan.className = "timestamp";
+      timeSpan.textContent = new Date(msg.time).toLocaleTimeString();
+
+      const editBtn = document.createElement("span");
+      editBtn.className = "edit-btn";
+      editBtn.textContent = "✏️";
+      editBtn.onclick = () => {
+        const newText = prompt("แก้ไขข้อความ:", msg.text);
+        if (newText) {
+          snapshot.ref.update({ text: newText });
+        }
+      };
+
+      const deleteBtn = document.createElement("span");
+      deleteBtn.className = "delete-btn";
+      deleteBtn.textContent = "🗑️";
+      deleteBtn.onclick = () => {
+        if (confirm("ลบข้อความนี้?")) {
+          snapshot.ref.remove();
+          msgDiv.remove();
+        }
+      };
+
+      msgDiv.appendChild(nameSpan);
+      msgDiv.appendChild(contentSpan);
+      msgDiv.appendChild(editBtn);
+      msgDiv.appendChild(deleteBtn);
+      msgDiv.appendChild(timeSpan);
+      messagesDiv.appendChild(msgDiv);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
     });
 
     function sendMessage() {
-      const name = document.getElementById("nameInput").value.trim();
-      const text = document.getElementById("messageInput").value.trim();
-      if (name && text) {
-        messagesRef.push({ name, text });
-        document.getElementById("messageInput").value = "";
+      const name = nameInput.value.trim();
+      const text = messageInput.value.trim();
+      const file = imageInput.files[0];
+      if (!name) return alert("กรุณาใส่ชื่อก่อนแชท");
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          messagesRef.push({ name, image: e.target.result, time: Date.now() });
+        };
+        reader.readAsDataURL(file);
+        imageInput.value = "";
+        messageInput.value = "";
+      } else if (text) {
+        messagesRef.push({ name, text, time: Date.now() });
+        messageInput.value = "";
       }
     }
   </script>

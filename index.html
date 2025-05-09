@@ -4,106 +4,167 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>กลุ่มแชท</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary: #3b82f6;
+      --bg-light: #f0f2f5;
+      --bg-dark: #1f1f1f;
+      --text-light: #333;
+      --text-dark: #f5f5f5;
+      --white: #ffffff;
+      --bubble-user-light: #daf1ff;
+      --bubble-user-dark: #2563eb33;
+      --bubble-other-light: #ececec;
+      --bubble-other-dark: #3a3a3a;
+    }
+    * {
+      box-sizing: border-box;
+    }
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f2f5;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-light);
       display: flex;
-      flex-direction: column;
-      align-items: center;
+      justify-content: center;
       padding: 20px;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark {
+      background: var(--bg-dark);
+      color: var(--text-dark);
     }
     .chat-container {
-      background: white;
-      border-radius: 12px;
+      background: var(--white);
+      border-radius: 16px;
       width: 100%;
       max-width: 600px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      padding: 20px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+    body.dark .chat-container {
+      background: #2b2b2b;
+    }
+    h2 {
+      margin: 0;
+      padding: 16px;
+      background: var(--primary);
+      color: white;
+      font-size: 20px;
     }
     #messages {
-      height: 400px;
+      flex: 1;
       overflow-y: auto;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 10px;
+      padding: 16px;
       background: #fafafa;
     }
+    body.dark #messages {
+      background: #202020;
+    }
     .message {
-      margin: 5px 0;
-      padding: 8px;
-      background: #e1f5fe;
-      border-radius: 8px;
+      max-width: 80%;
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      border-radius: 16px;
       position: relative;
+      word-wrap: break-word;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+    .own {
+      align-self: flex-end;
+      background: var(--bubble-user-light);
+      border-bottom-right-radius: 0;
+    }
+    body.dark .own {
+      background: var(--bubble-user-dark);
+    }
+    .other {
+      align-self: flex-start;
+      background: var(--bubble-other-light);
+      border-bottom-left-radius: 0;
+    }
+    body.dark .other {
+      background: var(--bubble-other-dark);
     }
     .timestamp {
       font-size: 10px;
-      color: #777;
-      position: absolute;
-      bottom: 2px;
-      right: 10px;
+      color: #888;
+      margin-top: 4px;
+      text-align: right;
     }
     .name {
-      font-weight: bold;
-      margin-right: 5px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: block;
     }
-    input, button {
+    .controls {
+      display: flex;
+      gap: 6px;
+      padding: 10px 16px;
+      border-top: 1px solid #ddd;
+      background: #fff;
+    }
+    body.dark .controls {
+      background: #2b2b2b;
+      border-top: 1px solid #444;
+    }
+    input[type="text"] {
+      flex: 1;
       padding: 10px;
       font-size: 14px;
-      border-radius: 6px;
+      border-radius: 8px;
       border: 1px solid #ccc;
-      outline: none;
     }
-    input {
-      width: calc(100% - 120px);
-      margin-bottom: 10px;
-    }
-    #nameInput {
-      width: 100%;
-      margin-bottom: 15px;
+    body.dark input[type="text"] {
+      background: #333;
+      color: #fff;
+      border: 1px solid #555;
     }
     button {
-      background: #2196f3;
+      background: var(--primary);
+      border: none;
+      padding: 10px 14px;
       color: white;
+      border-radius: 8px;
       cursor: pointer;
-      margin-left: 5px;
+      transition: background 0.3s;
     }
     button:hover {
-      background: #1976d2;
-    }
-    #controls {
-      display: flex;
-      align-items: center;
+      background: #2563eb;
     }
     #imageInput {
-      margin-top: 10px;
+      display: none;
     }
-    .emoji {
-      font-size: 20px;
+    #themeToggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: transparent;
+      color: #fff;
+      border: 2px solid #fff;
+      padding: 6px 10px;
+      border-radius: 8px;
       cursor: pointer;
-      margin-right: 5px;
-    }
-    .edit-btn, .delete-btn {
-      font-size: 10px;
-      margin-left: 10px;
-      cursor: pointer;
-      color: #888;
     }
   </style>
 </head>
 <body>
+  <button id="themeToggle">🌙</button>
   <div class="chat-container">
     <h2>💬 กลุ่มแชท</h2>
-    <input id="nameInput" type="text" placeholder="ใส่ชื่อของคุณ..." />
+    <input id="nameInput" type="text" placeholder="ใส่ชื่อของคุณ..." style="margin: 12px 16px; padding: 10px; border-radius: 8px; border: 1px solid #ccc;" />
     <div id="messages"></div>
-    <div id="controls">
-      <input id="messageInput" type="text" placeholder="พิมพ์ข้อความหรือใส่อีโมจิ..." />
+    <div class="controls">
+      <input id="messageInput" type="text" placeholder="พิมพ์ข้อความ..." />
       <button onclick="sendMessage()">ส่ง</button>
-      <button id="recordBtn">🎤 พูด</button>
+      <button id="recordBtn">🎤</button>
+      <label for="imageInput">📷</label>
+      <input type="file" id="imageInput" accept="image/*" />
     </div>
-    <input type="file" id="imageInput" accept="image/*" />
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -130,25 +191,20 @@
     const messagesDiv = document.getElementById("messages");
     const imageInput = document.getElementById("imageInput");
     const recordBtn = document.getElementById("recordBtn");
-
-    const nameColors = {};
-    function getColor(name) {
-      if (!nameColors[name]) {
-        const hue = Math.floor(Math.random() * 360);
-        nameColors[name] = `hsl(${hue}, 70%, 50%)`;
-      }
-      return nameColors[name];
-    }
+    const themeToggle = document.getElementById("themeToggle");
 
     messagesRef.on("child_added", function(snapshot) {
       const msg = snapshot.val();
       const msgDiv = document.createElement("div");
       msgDiv.className = "message";
 
+      const isOwn = msg.name === nameInput.value.trim();
+      msgDiv.classList.add(isOwn ? 'own' : 'other');
+
       const nameSpan = document.createElement("span");
       nameSpan.className = "name";
-      nameSpan.style.color = getColor(msg.name);
-      nameSpan.textContent = msg.name + ": ";
+      nameSpan.textContent = msg.name;
+      nameSpan.style.color = isOwn ? '#fff' : 'hsl(' + (msg.name.charCodeAt(0) * 13 % 360) + ',70%,60%)';
 
       const contentSpan = document.createElement("span");
       if (msg.image) {
@@ -165,34 +221,12 @@
         contentSpan.textContent = msg.text;
       }
 
-      const timeSpan = document.createElement("span");
+      const timeSpan = document.createElement("div");
       timeSpan.className = "timestamp";
       timeSpan.textContent = new Date(msg.time).toLocaleTimeString();
 
-      const editBtn = document.createElement("span");
-      editBtn.className = "edit-btn";
-      editBtn.textContent = "✏️";
-      editBtn.onclick = () => {
-        const newText = prompt("แก้ไขข้อความ:", msg.text);
-        if (newText) {
-          snapshot.ref.update({ text: newText });
-        }
-      };
-
-      const deleteBtn = document.createElement("span");
-      deleteBtn.className = "delete-btn";
-      deleteBtn.textContent = "🗑️";
-      deleteBtn.onclick = () => {
-        if (confirm("ลบข้อความนี้?")) {
-          snapshot.ref.remove();
-          msgDiv.remove();
-        }
-      };
-
       msgDiv.appendChild(nameSpan);
       msgDiv.appendChild(contentSpan);
-      msgDiv.appendChild(editBtn);
-      msgDiv.appendChild(deleteBtn);
       msgDiv.appendChild(timeSpan);
       messagesDiv.appendChild(msgDiv);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -218,7 +252,6 @@
       }
     }
 
-    // 🎤 บันทึกเสียง
     let mediaRecorder;
     let audioChunks = [];
 
@@ -247,6 +280,11 @@
         mediaRecorder.stop();
       }
     };
+
+    themeToggle.onclick = () => {
+      document.body.classList.toggle('dark');
+      themeToggle.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+    }
   </script>
 </body>
 </html>

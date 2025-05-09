@@ -101,6 +101,7 @@
     <div id="controls">
       <input id="messageInput" type="text" placeholder="พิมพ์ข้อความหรือใส่อีโมจิ..." />
       <button onclick="sendMessage()">ส่ง</button>
+      <button id="recordBtn">🎤 พูด</button>
     </div>
     <input type="file" id="imageInput" accept="image/*" />
   </div>
@@ -128,6 +129,7 @@
     const messageInput = document.getElementById("messageInput");
     const messagesDiv = document.getElementById("messages");
     const imageInput = document.getElementById("imageInput");
+    const recordBtn = document.getElementById("recordBtn");
 
     const nameColors = {};
     function getColor(name) {
@@ -154,6 +156,11 @@
         img.src = msg.image;
         img.style.maxWidth = "100%";
         contentSpan.appendChild(img);
+      } else if (msg.audio) {
+        const audio = document.createElement("audio");
+        audio.controls = true;
+        audio.src = msg.audio;
+        contentSpan.appendChild(audio);
       } else {
         contentSpan.textContent = msg.text;
       }
@@ -210,6 +217,36 @@
         messageInput.value = "";
       }
     }
+
+    // 🎤 บันทึกเสียง
+    let mediaRecorder;
+    let audioChunks = [];
+
+    recordBtn.onmousedown = async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.onload = e => {
+          messagesRef.push({
+            name: nameInput.value.trim(),
+            audio: e.target.result,
+            time: Date.now()
+          });
+        };
+        reader.readAsDataURL(blob);
+        audioChunks = [];
+      };
+      mediaRecorder.start();
+    };
+
+    recordBtn.onmouseup = () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+      }
+    };
   </script>
 </body>
 </html>
